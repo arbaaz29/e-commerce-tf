@@ -31,14 +31,11 @@ resource "aws_instance" "webserver" {
 
   availability_zone = var.private_subnet_cidrs["subnet-az${each.value["idx"]}"].az
 
-  user_data = templatefile("./scripts/run-httpd.sh.tpl", {
-    APACHE_LOG_DIR = "/var/log/httpd"
-    mysqlendpoint = aws_db_instance.rds.endpoint
-    username = "admin"
-    ecomdbpasswd = random_password.rds.result
-    })
+  user_data = templatefile("./scripts/run-httpd.sh.tpl",{
+    basename = var.basename  # Pass the basename variable
+  })
   key_name  = "lol"  # change this to the keys you already have or are going to generate
-
+  iam_instance_profile = aws_iam_instance_profile.ec2.name
   tags = {
     name = "${var.basename}-webserver-${each.value["az"]}"
   }
@@ -78,4 +75,9 @@ resource "aws_ebs_default_kms_key" "webserver_pub" {
 // enable encryption for root devices as well
 resource "aws_ebs_encryption_by_default" "webserver_pub" {
   depends_on = [ aws_ebs_default_kms_key.webserver_pub ]
+}
+
+
+resource "aws_cloudwatch_log_group" "ec2_logs" {
+  name = "/aws/ec2/${var.basename}-logs"
 }

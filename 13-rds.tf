@@ -25,10 +25,26 @@ resource "aws_db_instance" "rds" {
   apply_immediately = true
   skip_final_snapshot = true
   vpc_security_group_ids = [ aws_security_group.sg_rds.id ]
-
-depends_on = [ aws_security_group.sg_rds ]
+  # monitoring_interval = 60
+  depends_on = [ aws_security_group.sg_rds, aws_db_parameter_group.rds_logs ]
+  enabled_cloudwatch_logs_exports = ["general", "error", "slowquery", "audit"]
+  parameter_group_name = aws_db_parameter_group.rds_logs.name
 }
 
+resource "aws_db_parameter_group" "rds_logs" {
+  name   = "rds-logs-group"
+  family = "mysql8.0"
+
+  parameter {
+    name  = "general_log"
+    value = "1"
+  }
+
+  parameter {
+    name  = "slow_query_log"
+    value = "1"
+  }
+}
 # resource "aws_rds_certificate" "rds-certificate" {
 #   certificate_identifier = aws_acm_certificate.cert.id
 # }

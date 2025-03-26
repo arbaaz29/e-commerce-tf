@@ -7,7 +7,7 @@ resource "aws_lb" "alb" {
   security_groups    = [aws_security_group.sg_loadbalancer.id]
   subnets            = [aws_subnet.public-subnet["subnet-az1"].id, aws_subnet.public-subnet["subnet-az2"].id]
   #   access_logs {
-  #   bucket  = aws_s3_bucket.alb.id
+  #   bucket  = aws_s3_bucket.alb_logs.id
   #   prefix  = "alb-access-logs"
   #   enabled = true
   # }
@@ -89,5 +89,18 @@ resource "aws_lb_target_group_attachment" "lb_attachment" {
   port             = 80
   depends_on       = [aws_lb_target_group.tg]
 }
+
+# # S3 Bucket for ALB Logs with Object Ownership
+# resource "aws_s3_bucket" "alb_logs" {
+#   bucket = "e-commerce-alb-logs-${data.aws_caller_identity.current.account_id}"
+# }
+
+# resource "aws_s3_bucket_ownership_controls" "alb_logs" {
+#   bucket = aws_s3_bucket.alb_logs.id
+
+#   rule {
+#     object_ownership = "BucketOwnerEnforced"
+#   }
+# }
 
 
