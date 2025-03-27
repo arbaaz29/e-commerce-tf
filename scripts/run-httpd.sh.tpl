@@ -46,9 +46,9 @@ cd e-commerce-db || handle_error "Failed to change directory to e-commerce-db"
 # Download RDS SSL certificate
 wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem || handle_error "Failed to download RDS SSL certificate"
 
-# Retrieve database credentials from Secrets Manager
+# Retrieve database credentials from Secrets Manager you may need to change the name fpr secret-id as per the name you have specified for secret in secretsmanager
 DB_CREDENTIALS=$(aws secretsmanager get-secret-value \
-  --secret-id "${basename}/database-credentials-1" \
+  --secret-id "${basename}/database-credentials-12" \
   --query SecretString \
   --output text)
 
@@ -61,6 +61,7 @@ db=$(echo $DB_CREDENTIALS | jq -r '.db')
 # Debugging: Print out retrieved values (remove in production)
 echo "Endpoint: $MYSQLENDPOINT"
 echo "Username: $SQLUSER"
+echo "dbname: $db"
 
 # Load SQL data into the database with additional error checking
 mysql -h "$MYSQLENDPOINT" -u "$SQLUSER" \

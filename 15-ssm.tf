@@ -21,22 +21,3 @@ resource "aws_ssm_parameter" "db_db" {
   type  = "SecureString"
   value = "ecomdb"
 }
-
-resource "aws_iam_role_policy" "ssm_access" {
-  name = "ssm-parameter-access-policy"
-  role = aws_iam_role.webserver_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
-}

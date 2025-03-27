@@ -134,3 +134,9 @@ variable "rds_instance_type" {
 #   description = "policy for admin this is a object type"
 #   type = object({})
 # }
+
+
+variable "certificate_arn" {
+  description = "SSL/TLS certificate arn for loadbalancer and cloudfront"
+  type = string
+}

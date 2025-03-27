@@ -46,7 +46,7 @@ resource "aws_iam_policy" "webserver_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = aws_secretsmanager_secret.database_credentials.arn
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -57,6 +57,14 @@ resource "aws_iam_policy" "webserver_policy" {
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
         ]
+        Resource = aws_kms_key.kms.arn
+      },
+      {
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Effect   = "Allow"
         Resource = "*"
       }
     ]
@@ -310,45 +318,45 @@ resource "aws_iam_role_policy_attachment" "waf_logging_attach" {
 }
 
 
-resource "aws_iam_role" "vpc_flow_logs_role" {
-  name = "VPCFlowLogsRole"
+# resource "aws_iam_role" "vpc_flow_logs_role" {
+#   name = "VPCFlowLogsRole"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "vpc-flow-logs.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Principal = {
+#           Service = "vpc-flow-logs.amazonaws.com"
+#         }
+#         Action = "sts:AssumeRole"
+#       }
+#     ]
+#   })
+# }
 
-# Policy for VPC Flow Logs to CloudWatch
-resource "aws_iam_role_policy" "vpc_flow_logs_policy" {
-  name = "VPCFlowLogsPolicy"
-  role = aws_iam_role.vpc_flow_logs_role.id
+# # Policy for VPC Flow Logs to CloudWatch
+# resource "aws_iam_role_policy" "vpc_flow_logs_policy" {
+#   name = "VPCFlowLogsPolicy"
+#   role = aws_iam_role.vpc_flow_logs_role.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams"
-        ]
-        Resource = "arn:aws:logs:*:*:*"
-      }
-    ]
-  })
-}
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "logs:CreateLogGroup",
+#           "logs:CreateLogStream",
+#           "logs:PutLogEvents",
+#           "logs:DescribeLogGroups",
+#           "logs:DescribeLogStreams"
+#         ]
+#         Resource = "arn:aws:logs:*:*:*"
+#       }
+#     ]
+#   })
+# }
 
 # # CloudTrail S3 Bucket Policy
 # resource "aws_s3_bucket_policy" "cloudtrail_bucket_policy" {

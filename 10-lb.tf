@@ -25,7 +25,7 @@ resource "aws_lb" "alb" {
 //encryption certificates to be used for 443
 resource "aws_lb_listener_certificate" "lb_cert" {
   listener_arn    = aws_lb_listener.https_lb_listener.arn
-  certificate_arn = aws_acm_certificate.cert.arn
+  certificate_arn = aws_acm_certificate.cstm_cert.arn
 }
 
 //create listener to redirect http traffic to https traffic over port 443
@@ -52,7 +52,7 @@ resource "aws_lb_listener" "https_lb_listener" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.cert.arn
+  certificate_arn   = aws_acm_certificate.cstm_cert.arn
 
   default_action {
     type             = "forward"

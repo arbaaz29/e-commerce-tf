@@ -21,7 +21,7 @@ resource "aws_db_instance" "rds" {
 #   iops = 1000
   kms_key_id = aws_kms_key.kms.arn
   db_subnet_group_name = aws_db_subnet_group.rds.name
-  multi_az = false
+  multi_az = false # set this to true to enable multi az rds
   apply_immediately = true
   skip_final_snapshot = true
   vpc_security_group_ids = [ aws_security_group.sg_rds.id ]

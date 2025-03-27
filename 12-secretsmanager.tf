@@ -4,7 +4,7 @@ resource "random_password" "rds" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 resource "aws_secretsmanager_secret" "database_credentials" {
-  name = "${var.basename}/database-credentials-1"
+  name = "${var.basename}/database-credentials-12" #don't forget to change the name in bash script or your script will fail to verify
   description = "Database credentials for e-commerce application"
   kms_key_id = aws_kms_key.kms.arn
 }

@@ -1,28 +1,44 @@
-//tls_private_key is a hashicorp module you will have to initialize terraform again after using this module
-//create a private key to encrypt the certificate
-resource "tls_private_key" "midterms" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-//create the public cert using the private key
-resource "tls_self_signed_cert" "midterms" {
-  private_key_pem = tls_private_key.midterms.private_key_pem
+//import the certificate and use dns verification method
+# resource "aws_acm_certificate" "cert" {
+#   domain_name = "spring-e-commerce.academy"
+#   validation_method = "DNS"
+# }
 
-  subject {
-    common_name  = "spring.midterms.com"
-    organization = "UMD"
+# resource "aws_acm_certificate_validation" "cert" {
+#   certificate_arn         = aws_acm_certificate.cert.arn
+#   validation_record_fqdns = [for record in aws_route53_record.cert : record.fqdn]
+# }
+
+resource "aws_acm_certificate" "cstm_cert" {
+  domain_name       = "midterms.spring-e-commerce.academy"
+  validation_method = "DNS"
+
+  validation_option {
+    domain_name       = "midterms.spring-e-commerce.academy"
+    validation_domain = "spring-e-commerce.academy"
   }
-
-  validity_period_hours = 12
-
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth",
-  ]
 }
-//import the certificate and private key to the acm
+
+
+//import the certificate and use dns verification method
 resource "aws_acm_certificate" "cert" {
-  private_key      = tls_private_key.midterms.private_key_pem
-  certificate_body = tls_self_signed_cert.midterms.cert_pem
+  domain_name = "spring-e-commerce.academy"
+  validation_method = "DNS"
+  validation_option {
+    domain_name       = "spring-e-commerce.academy"
+    validation_domain = "spring-e-commerce.academy"
+  }
 }
+
+# resource "aws_route53_record" "alb" {
+#   zone_id = data.aws_route53_zone.spring.zone_id
+#   name    = "spring-e-commerce.academy"
+#   type    = "A"
+#   allow_overwrite = true
+  
+#   alias {
+#     name                   = aws_lb.alb.dns_name
+#     zone_id                = aws_lb.alb.zone_id
+#     evaluate_target_health = true
+#   }
+# }
