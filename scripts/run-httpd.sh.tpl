@@ -48,7 +48,7 @@ wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem || handle
 
 # Retrieve database credentials from Secrets Manager
 DB_CREDENTIALS=$(aws secretsmanager get-secret-value \
-  --secret-id "${basename}/database-credentials" \
+  --secret-id "${basename}/database-credentials-1" \
   --query SecretString \
   --output text)
 
@@ -56,6 +56,7 @@ DB_CREDENTIALS=$(aws secretsmanager get-secret-value \
 MYSQLENDPOINT=$(echo $DB_CREDENTIALS | jq -r '.endpoint')
 SQLUSER=$(echo $DB_CREDENTIALS | jq -r '.username')
 ECOMDBPASSWD=$(echo $DB_CREDENTIALS | jq -r '.password')
+db=$(echo $DB_CREDENTIALS | jq -r '.db')
 
 # Debugging: Print out retrieved values (remove in production)
 echo "Endpoint: $MYSQLENDPOINT"
@@ -66,7 +67,7 @@ mysql -h "$MYSQLENDPOINT" -u "$SQLUSER" \
     --ssl-ca=global-bundle.pem \
     --ssl-mode=REQUIRED \
     -p"$ECOMDBPASSWD" \
-    ecomdb < ecommerce_1.sql || handle_error "Failed to import SQL data to database"
+    "$db" < ecommerce_1.sql || handle_error "Failed to import SQL data to database"
 
 # Final success message
 echo "Deployment completed successfully at $(date)"

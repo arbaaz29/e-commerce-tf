@@ -16,6 +16,12 @@ resource "aws_ssm_parameter" "db_password" {
   value = random_password.rds.result
 }
 
+resource "aws_ssm_parameter" "db_db" {
+  name  = "/${var.basename}/database/db"
+  type  = "SecureString"
+  value = "ecomdb"
+}
+
 resource "aws_iam_role_policy" "ssm_access" {
   name = "ssm-parameter-access-policy"
   role = aws_iam_role.webserver_role.id

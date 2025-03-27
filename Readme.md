@@ -1,3 +1,7 @@
+<image src="/images/architecture.png">
+
+
+
 # Pre-requisites:
 
 1. Install terraform and add it to your path
@@ -31,6 +35,7 @@
     terraform apply 
 
 ```
+
 
 # Assets created
 

@@ -4,7 +4,7 @@ resource "random_password" "rds" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 resource "aws_secretsmanager_secret" "database_credentials" {
-  name = "${var.basename}/database-credentials"
+  name = "${var.basename}/database-credentials-1"
   description = "Database credentials for e-commerce application"
   kms_key_id = aws_kms_key.kms.arn
 }
@@ -14,5 +14,6 @@ resource "aws_secretsmanager_secret_version" "database_credentials" {
     username = "admin"
     password = random_password.rds.result
     endpoint = aws_db_instance.rds.address
+    db = "ecomdb" # remove if any problems
   })
 }
