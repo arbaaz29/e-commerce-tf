@@ -18,7 +18,7 @@ resource "aws_kms_key" "kms" {
         Sid    = "Enable IAM User Permissions"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Admin"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/student-user"
         },
         Action   = "kms:*"
         Resource = "*"
@@ -60,6 +60,21 @@ resource "aws_kms_key" "kms" {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         },
         Action = "*",
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow CloudTrail to use the key"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        },
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ],
         Resource = "*"
       }
     ]
