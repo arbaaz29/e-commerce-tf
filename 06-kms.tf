@@ -61,6 +61,21 @@ resource "aws_kms_key" "kms" {
         },
         Action = "*",
         Resource = "*"
+      },
+      {
+        Sid    = "Allow CloudTrail to use the key"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        },
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ],
+        Resource = "*"
       }
     ]
   })

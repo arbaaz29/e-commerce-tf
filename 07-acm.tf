@@ -11,7 +11,7 @@ resource "tls_self_signed_cert" "example" {
     organization = "Example Org"
   }
 
-  validity_period_hours = 8760  # 1년짜리 인증서
+  validity_period_hours = 8760  # 1 year
   is_ca_certificate     = false
 
   allowed_uses = [
