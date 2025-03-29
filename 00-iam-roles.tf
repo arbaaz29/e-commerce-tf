@@ -59,14 +59,18 @@ resource "aws_iam_policy" "webserver_policy" {
         ]
         Resource = aws_kms_key.kms.arn
       },
-      {
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
+      # {
+      #   Action = [
+      #     "*"
+      #   ]
+      #   Effect   = "Allow"
+      #   Resource = "*"
+      # },
+      # {
+      #   Effect   = "Allow"
+      #   Action   = "rds-db:connect"
+      #   Resource = "${aws_db_instance.rds.arn}/dbuser/e_comm_app"
+      # }
     ]
   })
 }
@@ -124,14 +128,15 @@ resource "aws_iam_policy" "alb_policy" {
         ],
         Resource = "*"
       },
-      {
-        Effect   = "Allow",
-        Action   = [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ],
-        Resource = "*"
-      },# Allow ALB to describe EC2 instances for target registration
+      # {
+      #   Effect   = "Allow",
+      #   Action   = [
+      #     "secretsmanager:GetSecretValue",
+      #     "secretsmanager:DescribeSecret"
+      #   ],
+      #   Resource = "*"
+      # },
+      # Allow ALB to describe EC2 instances for target registration
       {
         Effect   = "Allow",
         Action   = [
@@ -150,7 +155,15 @@ resource "aws_iam_policy" "alb_policy" {
           "acm:GetCertificate"
         ],
         Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:*"
+        ],
+        Resource = "*"
       }
+      
     ]
   })
 }

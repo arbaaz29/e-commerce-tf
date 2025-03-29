@@ -21,3 +21,10 @@ resource "aws_ssm_parameter" "db_db" {
   type  = "SecureString"
   value = "ecomdb"
 }
+
+
+resource "aws_ssm_parameter" "db_iam_username" {
+  name  = "/${var.basename}/database/iam_username"
+  type  = "SecureString"
+  value = "e_comm_app"
+}

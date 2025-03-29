@@ -1,52 +1,52 @@
-resource "aws_cloudwatch_metric_alarm" "ec2_cpu_alarm" {
-  alarm_name          = "EC2-CPU-Utilization"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  statistic           = "Average"
-  period              = 300
-  evaluation_periods  = 1
-  threshold           = 80
-  comparison_operator = "GreaterThanThreshold"
-  alarm_description   = "Alarm when EC2 CPU exceeds 80% utilization"
-  dimensions = {
-    InstanceId = aws_instance.webserver["subnet-az1"].id  # EC2 instance ID (subnet-az1)
-  }
-}
+# resource "aws_cloudwatch_metric_alarm" "ec2_cpu_alarm" {
+#   alarm_name          = "EC2-CPU-Utilization"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/EC2"
+#   statistic           = "Average"
+#   period              = 300
+#   evaluation_periods  = 1
+#   threshold           = 80
+#   comparison_operator = "GreaterThanThreshold"
+#   alarm_description   = "Alarm when EC2 CPU exceeds 80% utilization"
+#   dimensions = {
+#     InstanceId = aws_instance.webserver["subnet-az1"].id  # EC2 instance ID (subnet-az1)
+#   }
+# }
 
-resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
-  alarm_name          = "rds-high-cpu"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/RDS"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 75  # 75% CPU usage
-  alarm_description   = "Triggers when RDS CPU usage exceeds 75%"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-  ok_actions         = [aws_sns_topic.alerts.arn]
+# resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
+#   alarm_name          = "rds-high-cpu"
+#   comparison_operator = "GreaterThanThreshold"
+#   evaluation_periods  = 2
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/RDS"
+#   period              = 60
+#   statistic           = "Average"
+#   threshold           = 75  # 75% CPU usage
+#   alarm_description   = "Triggers when RDS CPU usage exceeds 75%"
+#   alarm_actions       = [aws_sns_topic.alerts.arn]
+#   ok_actions         = [aws_sns_topic.alerts.arn]
 
-  dimensions = {
-    DBInstanceIdentifier = aws_db_instance.rds.id
-  }
-}
+#   dimensions = {
+#     DBInstanceIdentifier = aws_db_instance.rds.id
+#   }
+# }
 
-resource "aws_cloudwatch_metric_alarm" "rds_high_latency" {
-  alarm_name          = "rds-high-latency"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
-  metric_name         = "DatabaseConnections"
-  namespace           = "AWS/RDS"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 100 # 100 connections
-  alarm_description   = "Triggers when RDS query latency exceeds threshold"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
+# resource "aws_cloudwatch_metric_alarm" "rds_high_latency" {
+#   alarm_name          = "rds-high-latency"
+#   comparison_operator = "GreaterThanThreshold"
+#   evaluation_periods  = 2
+#   metric_name         = "DatabaseConnections"
+#   namespace           = "AWS/RDS"
+#   period              = 60
+#   statistic           = "Average"
+#   threshold           = 100 # 100 connections
+#   alarm_description   = "Triggers when RDS query latency exceeds threshold"
+#   alarm_actions       = [aws_sns_topic.alerts.arn]
 
-  dimensions = {
-    DBInstanceIdentifier = aws_db_instance.rds.id
-  }
-}
+#   dimensions = {
+#     DBInstanceIdentifier = aws_db_instance.rds.id
+#   }
+# }
 
 resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
   alarm_name          = "ALB-5XX-Errors"
@@ -103,32 +103,31 @@ resource "aws_sns_topic" "alerts" {
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "email"
-  endpoint  = "your-email@example.com" # sample email
+  endpoint  = "arbazij@gmail.com" # sample email
 }
 
 resource "aws_cloudwatch_dashboard" "monitoring_dashboard" {
   dashboard_name = "Monitoring-Dashboard"
-
+  # {
+    #   "type": "metric",
+    #   "x": 0,
+    #   "y": 0,
+    #   "width": 6,
+    #   "height": 6,
+    #   "properties": {
+    #     "metrics": [
+    #       [ "AWS/EC2", "CPUUtilization", "InstanceId", "${aws_instance.webserver["subnet-az1"].id}" ],
+    #       [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "${aws_db_instance.rds.id}" ]
+    #     ],
+    #     "view": "timeSeries",
+    #     "stacked": false,
+    #     "region": "us-east-1",
+    #     "title": "EC2 & RDS CPU Usage"
+    #   }
+    # },
   dashboard_body = <<EOF
 {
   "widgets": [
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 0,
-      "width": 6,
-      "height": 6,
-      "properties": {
-        "metrics": [
-          [ "AWS/EC2", "CPUUtilization", "InstanceId", "${aws_instance.webserver["subnet-az1"].id}" ],
-          [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "${aws_db_instance.rds.id}" ]
-        ],
-        "view": "timeSeries",
-        "stacked": false,
-        "region": "us-east-1",
-        "title": "EC2 & RDS CPU Usage"
-      }
-    },
     {
       "type": "metric",
       "x": 6,

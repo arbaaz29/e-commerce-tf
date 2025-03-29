@@ -140,3 +140,8 @@ variable "certificate_arn" {
   description = "SSL/TLS certificate arn for loadbalancer and cloudfront"
   type = string
 }
+
+variable "secretnumber" {
+  description = "Increase as you deploy it everytime"
+  type = string
+}

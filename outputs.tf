@@ -10,3 +10,11 @@ output "rds_password" {
 output "loadbalancer_endpoint" {
   value = aws_lb.alb.dns_name
 }
+
+# output "public" {
+#   value = aws_instance.webserver_pub[*].public_dns
+# }
+
+# output "private" {
+#   value = aws_instance.webserver[*].private_ip
+# }

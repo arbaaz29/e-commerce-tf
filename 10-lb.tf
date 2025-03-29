@@ -12,7 +12,7 @@ resource "aws_lb" "alb" {
   #   enabled = true
   # }
   # connection_logs {
-  #   bucket = aws_s3_bucket.alb.id
+  #   bucket = aws_s3_bucket.alb_connection_logs.id
   #   prefix  = "alb-connection-logs"
   #   enabled = true
   # }
@@ -24,8 +24,9 @@ resource "aws_lb" "alb" {
 
 //encryption certificates to be used for 443
 resource "aws_lb_listener_certificate" "lb_cert" {
+  depends_on = [ aws_acm_certificate.cstm_cert ]
   listener_arn    = aws_lb_listener.https_lb_listener.arn
-  certificate_arn = aws_acm_certificate.self_signed_cert.arn
+  certificate_arn = aws_acm_certificate.cert.arn
 }
 
 //create listener to redirect http traffic to https traffic over port 443
@@ -48,11 +49,12 @@ resource "aws_lb_listener" "lb_listener" {
 }
 //create listener for encrypted communication
 resource "aws_lb_listener" "https_lb_listener" {
+  depends_on = [ aws_acm_certificate.cert ]
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.self_signed_cert.arn
+  certificate_arn   = aws_acm_certificate.cstm_cert.arn
 
   default_action {
     type             = "forward"
@@ -89,18 +91,4 @@ resource "aws_lb_target_group_attachment" "lb_attachment" {
   port             = 80
   depends_on       = [aws_lb_target_group.tg]
 }
-
-# # S3 Bucket for ALB Logs with Object Ownership
-# resource "aws_s3_bucket" "alb_logs" {
-#   bucket = "e-commerce-alb-logs-${data.aws_caller_identity.current.account_id}"
-# }
-
-# resource "aws_s3_bucket_ownership_controls" "alb_logs" {
-#   bucket = aws_s3_bucket.alb_logs.id
-
-#   rule {
-#     object_ownership = "BucketOwnerEnforced"
-#   }
-# }
-
 

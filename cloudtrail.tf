@@ -61,11 +61,11 @@ resource "aws_s3_bucket_policy" "cloudtrail_bucket_policy" {
 
 resource "aws_cloudwatch_log_group" "cloudtrail_log_group" {
   name              = "/aws/cloudtrail/main-log-group"
-  retention_in_days = 365
+  retention_in_days = 1
 }
 
 resource "aws_s3_bucket" "cloudtrail_logs" {
-  bucket = "enpm818n-ecommerce-cloudtrail-log-bucket"
+  bucket = "ecomm-cloudtrail-log-bucket"
 }
 
 // !! NEED MANUAL SETTING FOR Cloudtrail !!

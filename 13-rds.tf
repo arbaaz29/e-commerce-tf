@@ -16,6 +16,7 @@ resource "aws_db_instance" "rds" {
   instance_class = var.rds_instance_type
   username = "admin"
   password = random_password.rds.result
+  iam_database_authentication_enabled = true
   storage_encrypted = true
   storage_type = "gp2"
 #   iops = 1000

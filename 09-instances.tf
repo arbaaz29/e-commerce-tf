@@ -33,8 +33,9 @@ resource "aws_instance" "webserver" {
 
   user_data = templatefile("./scripts/run-httpd.sh.tpl",{
     basename = var.basename  # Pass the basename variable
+    secretnumber = var.secretnumber
   })
-  key_name  = "efs_ec2_key_pair"  # change this to the keys you already have or are going to generate
+  key_name  = "lol"  # change this to the keys you already have or are going to generate
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   tags = {
     name = "${var.basename}-webserver-${each.value["az"]}"
@@ -61,7 +62,7 @@ resource "aws_instance" "webserver_pub" {
   subnet_id = aws_subnet.public-subnet[each.key].id
   monitoring = true
   availability_zone = var.public_subnet_cidrs["subnet-az${each.value["idx"]}"].az
-  key_name = "efs_ec2_key_pair" # change this to the keys you already have or are going to generate
+  key_name = "lol" # change this to the keys you already have or are going to generate
   associate_public_ip_address = true
   tags = {
     name = "Webserver_public"
@@ -78,6 +79,6 @@ resource "aws_ebs_encryption_by_default" "webserver_pub" {
 }
 
 
-# resource "aws_cloudwatch_log_group" "ec2_logs" {
-#   name = "/aws/ec2/${var.basename}-logs"
-# }
+resource "aws_cloudwatch_log_group" "ec2_logs" {
+  name = "/aws/ec2/${var.basename}-logs"
+}
