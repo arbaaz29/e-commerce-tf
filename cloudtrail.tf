@@ -65,7 +65,7 @@ resource "aws_cloudwatch_log_group" "cloudtrail_log_group" {
 }
 
 resource "aws_s3_bucket" "cloudtrail_logs" {
-  bucket = "ecomm-cloudtrail-log-bucket"
+  bucket = "my-ecomm-cloudtrail-log-bucket"
 }
 
 // !! NEED MANUAL SETTING FOR Cloudtrail !!

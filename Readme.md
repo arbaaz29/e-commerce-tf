@@ -68,3 +68,7 @@
 11. New instance in public subnet that you can access using ssh just remember to change the key_name attribute in instances to the keys you have
 
 12. You can try deploying your code onto the instances within the private subnet 
+
+
+# In-Depth service architecture:
+<image src="/images/Services_attached.png">

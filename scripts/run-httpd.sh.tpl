@@ -35,22 +35,6 @@ sudo apt update -y || handle_error "Failed to update package lists"
 sudo apt upgrade -y || handle_error "Failed to upgrade"
 sudo apt-get install -y apache2 git mysql-client unzip jq php libapache2-mod-php php-mysql || handle_error "Failed to install required packages"
 
-# # Install Composer
-# export COMPOSER_HOME="$HOME/.composer"
-# php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"  || handle_error "unable to download composer"
-# php composer-setup.php || handle_error "composer not installed"
-# php -r "unlink('composer-setup.php');"  || handle_error "cannot unlink the composer"
-
-# # Move Composer to binaries for it to be available in the path
-# if [ -f composer.phar ]; then
-#     sudo mv composer.phar /usr/local/bin/composer
-# else
-#     handle_error "Composer installation failed"
-# fi
-
-# Verify if Composer has been installed properly
-composer --version
-
 # Install AWS CLI
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" || handle_error "Failed to download AWS CLI"
 unzip awscliv2.zip || handle_error "Failed to unzip AWS CLI"
@@ -61,31 +45,33 @@ sudo systemctl start apache2 || handle_error "Failed to start Apache"
 sudo systemctl enable apache2 || handle_error "Failed to enable Apache"
 
 # Modify configuration to launch PHP first
-echo "
+cat<<EOF | sudo tee /etc/apache2/mods-enabled/dir.conf > /dev/null 
 <IfModule mod_dir.c>
     DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
 </IfModule>
-" | sudo tee /etc/apache2/mods-enabled/dir.conf > /dev/null || handle_error "Failed to replace config file"
+EOF
 
 # Restart Apache
 sudo systemctl restart apache2 || handle_error "Failed to restart Apache"
 
-# # Remove the default index.html
-# sudo rm -rf /var/www/html/index.html || handle_error "Failed to delete index"
+# Remove the default index.html
+sudo rm -rf /var/www/html/index.html || handle_error "Failed to delete index"
 
-# # Download and move the application
-# git clone https://github.com/edaviage/818N-E_Commerce_Application.git || handle_error "Unable to download GitHub repo"
+# Download and move the application
+git clone https://github.com/edaviage/818N-E_Commerce_Application.git || handle_error "Unable to download GitHub repo"
 
-# cd 818N-E_Commerce_Application || handle_error "Failed to change directory to 818N-E_Commerce_Application"
+cd 818N-E_Commerce_Application || handle_error "Failed to change directory to e-commerce-app"
 
-# sudo mv * /var/www/html || handle_error "Unable to move the repo"
-# # Verify critical files exist
-# if [ ! -f /var/www/html/index.php ]; then
-#     handle_error "Critical files missing after move operation"
-# fi
+sudo mv * /var/www/html || handle_error "Unable to move the repo"
+
+# Verify critical files exist
+if [ ! -f /var/www/html/index.php ]; then
+    handle_error "Critical files missing after move operation"
+fi
 
 # Clone the Git repository for the database schema
 git clone https://github.com/arbaaz29/e-commerce-db.git || handle_error "Failed to clone repository"
+
 cd e-commerce-db || handle_error "Failed to change directory to e-commerce-db"
 
 # Verify repository contents
@@ -105,95 +91,29 @@ mysql -h "$MYSQLENDPOINT" -u "$SQLUSER" \
     "$db" < ecommerce_1.sql || handle_error "Failed to import SQL data to database"
 
 # Final success message
-echo "Deployment completed successfully at $(date)"
+echo "Loading database completed successfully at $(date)"
 
-# Move to the includes directory
-# cd /var/www/html/includes/ && composer require aws/aws-sdk-php && wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem || handle_error "Unable to move to directory"
+#Move to the includes directory
+cd /var/www/html/includes/
 
-# composer require aws/aws-sdk-php || handle_error "AWS SDK not installed"
+wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem || handle_error "Unable to download certificate"
+get_db_credentials
+if [ ! -f global-bundle.pem ]; then
+    handle_error "Critical pem file missing"
+fi
+certPath = ./global-bundle.pem
+# Create connect.php for DB connection
+cat <<EOF | sudo tee ./connect.php > /dev/null || handle_error "Failed to replace connect file"
+<?php
+\$con = new mysqli('$MYSQLENDPOINT','$SQLUSER','$ECOMDBPASSWD','$db');
+if(!\$con){
+    die(mysqli_error(\$con));
+}
+?>
+EOF
 
-# wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
-
-# # Create connect.php for DB connection
-# cat <<EOF | sudo tee ./connect.php > /dev/null || handle_error "Failed to replace connect file"
-# <?php
-# require 'vendor/autoload.php';
-
-# use Aws\SecretsManager\SecretsManagerClient;
-# use Aws\Exception\AwsException;
-
-# function handle_error(\$message) {
-#     echo "ERROR: \$message\n";
-#     exit(1);
-# }
-
-# try {
-#     // Initialize variables
-#     \$basename = "your-basename"; // Replace with your actual basename
-#     \$secretnumber = "your-secretnumber"; // Replace with your actual secret number
-#     \$secretId = "\${basename}/database-credentials-\${secretnumber}";
-    
-#     // Create SecretsManager client
-#     \$client = new SecretsManagerClient([
-#         'region' => 'us-east-1', // Replace with your AWS region
-#         'version' => 'latest'
-#     ]);
-    
-#     // Get secret value
-#     \$result = \$client->getSecretValue([
-#         'SecretId' => \$secretId,
-#     ]);
-    
-#     // Get the secret string
-#     if (isset(\$result['SecretString'])) {
-#         \$dbCredentials = \$result['SecretString'];
-        
-#         // Parse JSON credentials
-#         \$credentials = json_decode(\$dbCredentials, true);
-#         \$endpoint = \$credentials['endpoint'];
-#         \$sqlusername = \$credentials['username'];
-#         \$password = \$credentials['password'];
-#         \$db = \$credentials['db'];
-        
-#         // Debugging: Print out retrieved values (remove in production)
-#         echo "Endpoint: \$endpoint\n";
-#         echo "Username: \$sqlusername\n";
-#         echo "dbname: \$db\n";
-        
-#         // SSL Configuration
-#         \$sslCaPath = 'global-bundle.pem';
-        
-#         // Initialize MySQL connection
-#         \$mysqli = mysqli_init();
-        
-#         // Configure SSL
-#         mysqli_ssl_set(\$mysqli, NULL, NULL, \$sslCaPath, NULL, NULL);
-        
-#         // Set option to verify server certificate
-#         \$mysqli->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
-        
-#         // Establish connection with SSL
-#         if (!\$mysqli->real_connect(\$endpoint, \$sqlusername, \$password, \$db, 3306, NULL, MYSQLI_CLIENT_SSL)) {
-#             die('Connect Error (' . \$mysqli->connect_errno . ') ' . \$mysqli->connect_error);
-#         }
-        
-#         echo "Connected successfully using SSL/TLS!";
-        
-#         // Now you can perform your database operations
-#         // ...
-        
-#         // Close connection when done
-#         \$mysqli->close();
-#     }
-    
-# } catch (Exception \$e) {
-#     echo "Error: " . \$e->getMessage();
-# }
-# ?>
-# EOF
-
-# # Final success message
-# echo "PHP app deployed at $(date)"
+# Final success message
+echo "PHP app configured and deployed at $(date)"
 
 # Install CloudWatch Agent and collectd
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb

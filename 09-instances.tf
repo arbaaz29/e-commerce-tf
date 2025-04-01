@@ -43,14 +43,14 @@ resource "aws_instance" "webserver" {
 }
 
 //import the key to make it default kms key for encryption
-resource "aws_ebs_default_kms_key" "webserver" {
-  key_arn    = aws_kms_key.kms.arn
-  depends_on = [aws_kms_key.kms]
-}
+# resource "aws_ebs_default_kms_key" "webserver" {
+#   key_arn    = aws_kms_key.kms.arn
+#   depends_on = [aws_kms_key.kms]
+# }
 
 // enable encryption for root devices as well
-resource "aws_ebs_encryption_by_default" "webserver" {
-  depends_on = [aws_ebs_default_kms_key.webserver]
+resource "aws_ebs_default_kms_key" "webserver" {
+  key_arn = "arn:aws:kms:us-east-1:588738579349:key/48eb3b19-35ae-43f1-8d2f-09de0afcf7b4"
 }
 
 resource "aws_instance" "webserver_pub" {

@@ -27,7 +27,7 @@ resource "aws_kms_key" "kms" {
         Sid    = "Allow EC2 and RDS to use the key"
         Effect = "Allow"
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Service = ["ec2.amazonaws.com", "rds.amazonaws.com", "s3.amazonaws.com"]
         },
         Action = [
           "kms:Encrypt",
@@ -39,10 +39,10 @@ resource "aws_kms_key" "kms" {
         Resource = "*"
       },
       {
-        Sid    = "Allow s3 to use the key"
+        Sid    = "Allow ASG to use the key"
         Effect = "Allow"
         Principal = {
-          Service = "s3.amazonaws.com"
+          AWS = aws_iam_role.webserver_role.arn
         },
         Action = [
           "kms:Encrypt",
@@ -53,15 +53,7 @@ resource "aws_kms_key" "kms" {
         ],
         Resource = "*"
       },
-      {
-        Sid    = "Allow s3 to use the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        Action = "*",
-        Resource = "*"
-      }
+
     ]
   })
 }
