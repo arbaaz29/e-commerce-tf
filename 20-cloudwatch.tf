@@ -13,40 +13,41 @@
 #   }
 # }
 
-# resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
-#   alarm_name          = "rds-high-cpu"
-#   comparison_operator = "GreaterThanThreshold"
-#   evaluation_periods  = 2
-#   metric_name         = "CPUUtilization"
-#   namespace           = "AWS/RDS"
-#   period              = 60
-#   statistic           = "Average"
-#   threshold           = 75  # 75% CPU usage
-#   alarm_description   = "Triggers when RDS CPU usage exceeds 75%"
-#   alarm_actions       = [aws_sns_topic.alerts.arn]
-#   ok_actions         = [aws_sns_topic.alerts.arn]
+resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
+  alarm_name          = "rds-high-cpu"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/RDS"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 75  # 75% CPU usage
+  alarm_description   = "Triggers when RDS CPU usage exceeds 75%"
+  alarm_actions       = ["${aws_sns_topic.alerts.arn}"]
+  ok_actions         = [aws_sns_topic.alerts.arn]
+  insufficient_data_actions = [  ]
+  # dimensions = {
+  #   DBInstanceIdentifier = aws_db_instance.rds.identifier
+  # }
+}
 
-#   dimensions = {
-#     DBInstanceIdentifier = aws_db_instance.rds.id
-#   }
-# }
+resource "aws_cloudwatch_metric_alarm" "rds_high_latency" {
+  alarm_name          = "rds-high-latency"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "DatabaseConnections"
+  namespace           = "AWS/RDS"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 100 # 100 connections
+  alarm_description   = "Triggers when RDS query latency exceeds threshold"
+  alarm_actions       = ["${aws_sns_topic.alerts.arn}"]
+  insufficient_data_actions = []
 
-# resource "aws_cloudwatch_metric_alarm" "rds_high_latency" {
-#   alarm_name          = "rds-high-latency"
-#   comparison_operator = "GreaterThanThreshold"
-#   evaluation_periods  = 2
-#   metric_name         = "DatabaseConnections"
-#   namespace           = "AWS/RDS"
-#   period              = 60
-#   statistic           = "Average"
-#   threshold           = 100 # 100 connections
-#   alarm_description   = "Triggers when RDS query latency exceeds threshold"
-#   alarm_actions       = [aws_sns_topic.alerts.arn]
-
-#   dimensions = {
-#     DBInstanceIdentifier = aws_db_instance.rds.id
-#   }
-# }
+  # dimensions = {
+  #   DBInstanceIdentifier = aws_db_instance.rds.identifier
+  # }
+}
 
 resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
   alarm_name          = "ALB-5XX-Errors"
@@ -58,10 +59,11 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
   statistic           = "Sum"
   threshold           = 1  # 1 error creates alarm
   alarm_description   = "Triggers when ALB 5XX errors exceed threshold"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-  dimensions = {
-    LoadBalancer = aws_lb.alb.arn
-  }
+  alarm_actions       = ["${aws_sns_topic.alerts.arn}"]
+  insufficient_data_actions = []
+  # dimensions = {
+  #   LoadBalancer = aws_lb.alb.arn_suffix
+  # }
 }
 
 resource "aws_cloudwatch_metric_alarm" "alb_4xx_errors" {
@@ -74,10 +76,11 @@ resource "aws_cloudwatch_metric_alarm" "alb_4xx_errors" {
   statistic           = "Sum"
   threshold           = 1  # 1 error creates alarm
   alarm_description   = "Triggers when ALB 4XX errors exceed threshold"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-  dimensions = {
-    LoadBalancer = aws_lb.alb.arn
-  }
+  alarm_actions       = ["${aws_sns_topic.alerts.arn}"]
+  insufficient_data_actions = [  ]
+  # dimensions = {
+  #   LoadBalancer = aws_lb.alb.arn_suffix
+  # }
 }
 
 resource "aws_cloudwatch_metric_alarm" "alb_request_count" {
@@ -88,12 +91,13 @@ resource "aws_cloudwatch_metric_alarm" "alb_request_count" {
   namespace           = "AWS/ApplicationELB"
   period              = 60
   statistic           = "Sum"
-  threshold           = 1000  # 트래픽 요청이 1000을 초과하면 알람
+  threshold           = 1  # 트래픽 요청이 1000을 초과하면 알람
   alarm_description   = "Triggers when ALB request count exceeds threshold"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-  dimensions = {
-    LoadBalancer = aws_lb.alb.arn
-  }
+  alarm_actions       = ["${aws_sns_topic.alerts.arn}"]
+  insufficient_data_actions = [  ]
+  # dimensions = {
+  #   LoadBalancer = aws_lb.alb.arn_suffix
+  # }
 }
 
 resource "aws_sns_topic" "alerts" {
@@ -104,6 +108,20 @@ resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "email"
   endpoint  = "arbazij@gmail.com" # sample email
+}
+
+resource "aws_cloudwatch_metric_alarm" "ec2_cpu" {
+     alarm_name                = "cpu-utilization"
+     comparison_operator       = "GreaterThanOrEqualToThreshold"
+     evaluation_periods        = "2"
+     metric_name               = "CPUUtilization"
+     namespace                 = "AWS/EC2"
+     period                    = "120" #seconds
+     statistic                 = "Average"
+     threshold                 = "60"
+     alarm_description         = "This metric monitors ec2 cpu utilization"
+     insufficient_data_actions = []
+     alarm_actions = [ "${aws_sns_topic.alerts.arn}", "${aws_autoscaling_policy.asg.arn}"]
 }
 
 resource "aws_cloudwatch_dashboard" "monitoring_dashboard" {

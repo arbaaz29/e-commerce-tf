@@ -85,9 +85,9 @@ resource "aws_lb_target_group" "tg" {
 }
 //search for ec2 instance targets in private subnet
 resource "aws_lb_target_group_attachment" "lb_attachment" {
-  for_each         = aws_instance.webserver
+  # for_each         = aws_instance.webserver
   target_group_arn = aws_lb_target_group.tg.arn
-  target_id        = aws_instance.webserver[each.key].id
+  target_id        = aws_instance.webserver.id
   port             = 80
   depends_on       = [aws_lb_target_group.tg]
 }

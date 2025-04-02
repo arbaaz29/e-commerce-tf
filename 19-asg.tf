@@ -11,6 +11,47 @@ resource "aws_autoscaling_group" "asg" {
     id = aws_launch_template.webserver.id
   }
 vpc_zone_identifier = values(aws_subnet.private-subnet)[*].id
+enabled_metrics = [
+"GroupMinSize",
+
+"GroupMaxSize",
+
+"GroupDesiredCapacity",
+
+"GroupInServiceInstances",
+
+"GroupPendingInstances",
+
+"GroupStandbyInstances",
+
+"GroupTerminatingInstances",
+
+"GroupTotalInstances",
+
+"GroupInServiceCapacity",
+
+"GroupPendingCapacity",
+
+"GroupStandbyCapacity",
+
+"GroupTerminatingCapacity",
+
+"GroupTotalCapacity",
+
+"WarmPoolDesiredCapacity",
+
+"WarmPoolWarmedCapacity",
+
+"WarmPoolPendingCapacity",
+
+"WarmPoolTerminatingCapacity",
+
+"WarmPoolTotalCapacity",
+
+"GroupAndWarmPoolDesiredCapacity",
+
+"GroupAndWarmPoolTotalCapacity"]
+metrics_granularity = "1Minute"
 }
 
 resource "aws_autoscaling_attachment" "elb_conn" {

@@ -83,15 +83,24 @@ wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem || handle
 # Retrieve database credentials from Secrets Manager
 get_db_credentials
 
-# Load SQL data into the database
-mysql -h "$MYSQLENDPOINT" -u "$SQLUSER" \
+# Check if the database is already configured
+DB_CHECK=$(mysql -h "$MYSQLENDPOINT" -u "$SQLUSER" \
     --ssl-ca=global-bundle.pem \
     --ssl-mode=REQUIRED \
     -p"$ECOMDBPASSWD" \
-    "$db" < ecommerce_1.sql || handle_error "Failed to import SQL data to database"
+    -D "$db" -e "SHOW TABLES LIKE 'admin_table';" 2>/dev/null)
 
-# Final success message
-echo "Loading database completed successfully at $(date)"
+if [[ -n "$DB_CHECK" ]]; then
+    echo "Database is already configured. Skipping SQL import."
+else
+    echo "Database is empty. Importing SQL data..."
+    mysql -h "$MYSQLENDPOINT" -u "$SQLUSER" \
+        --ssl-ca=global-bundle.pem \
+        --ssl-mode=REQUIRED \
+        -p"$ECOMDBPASSWD" \
+        "$db" < ecommerce_1.sql || handle_error "Failed to import SQL data to database"
+    echo "Database import completed successfully."
+fi
 
 #Move to the includes directory
 cd /var/www/html/includes/
