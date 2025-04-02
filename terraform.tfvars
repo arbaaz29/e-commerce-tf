@@ -1,7 +1,8 @@
 vpc_cidr = "10.0.0.0/16"
 tag_name = "midterms"
 basename = "e-commerce"
-secretnumber = "52"
+db_master_username = "admin"
+db_name = "ecomdb"
 public_subnet_cidrs = {
   subnet-az1 = {
     az   = "us-east-1a"
@@ -41,10 +42,6 @@ private_subnet_cidrs_rds = {
 instance_type_value = "t2.micro"
 rds_instance_type = "db.t3.micro"
 
-
-# private_subnet_az = [us-east-1a, us-east-1b]
-
-certificate_arn = "arn:aws:acm:us-east-1:588738579349:certificate/74349c86-0c4a-4af1-90a9-d70e45d9ed4f"
 
 
 

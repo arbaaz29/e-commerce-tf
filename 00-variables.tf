@@ -95,53 +95,14 @@ variable "rds_instance_type" {
   default = "db.t4g.micro"
   }
 
-# variable "private_subnet_az" {
-#   description = "Default az"
-#   type = map(any)
-#   default = {
-#     subnet-az1 = {
-#       az = "us-east-1a"
-#     }
-#     subnet-az2 = {
-#       az = "us-east-1b"
-#     }
-#   }
-# }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# variable "admin_role" {
-#   description = "policy for admin this is a object type"
-#   type = object({})
-# }
-
-
-variable "certificate_arn" {
-  description = "SSL/TLS certificate arn for loadbalancer and cloudfront"
+variable "db_master_username" {
+  description = "This is the master user for db"
   type = string
+  default = "admin"
 }
 
-variable "secretnumber" {
-  description = "Increase as you deploy it everytime"
+variable "db_name" {
+  description = "This is the database name"
   type = string
+  default = "ecomdb"
 }

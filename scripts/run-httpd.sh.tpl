@@ -12,9 +12,10 @@ handle_error() {
 
 # Retrieve database credentials from Secrets Manager
 get_db_credentials() {
+  echo "$secretname"
     # Customize the secret-id as per your naming convention in Secrets Manager
     DB_CREDENTIALS=$(aws secretsmanager get-secret-value \
-        --secret-id "${basename}/database-credentials-${secretnumber}" \
+        --secret-id "${secretname}" \
         --query SecretString \
         --output text) || handle_error "Failed to retrieve database credentials"
 

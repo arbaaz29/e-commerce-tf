@@ -20,7 +20,7 @@ resource "aws_db_instance" "rds" {
   storage_encrypted = true
   storage_type = "gp2"
 #   iops = 1000
-  kms_key_id = aws_kms_key.kms.arn
+  kms_key_id = aws_kms_key.kms_rds.arn
   db_subnet_group_name = aws_db_subnet_group.rds.name
   multi_az = false # set this to true to enable multi az rds
   apply_immediately = true

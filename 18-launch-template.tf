@@ -21,7 +21,7 @@ resource "aws_launch_template" "webserver" {
       volume_size           = 8
       volume_type           = "gp2"
       encrypted             = true
-      kms_key_id =  aws_kms_key.kms.arn
+      kms_key_id =  aws_kms_key.kms_ebs.arn
       delete_on_termination = true
     }
   }
@@ -38,7 +38,6 @@ resource "aws_launch_template" "webserver" {
   }
 
   user_data = base64encode(templatefile("./scripts/run-httpd.sh.tpl", {
-    basename     = var.basename,
-    secretnumber = var.secretnumber
+    secretname = aws_secretsmanager_secret.database_credentials.name
   })) 
 }
