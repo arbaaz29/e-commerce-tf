@@ -41,19 +41,39 @@ resource "aws_kms_key" "kms" {
       {
         Sid    = "Allow ASG to use the key"
         Effect = "Allow"
+        Principal ={
+        "AWS" = "*"
+        },
+      Action = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:CreateGrant",
+        "kms:DescribeKey"
+      ],
+      Resource = "*",
+      Condition =  {
+        "StringEquals"= {
+          "kms:CallerAccount" = "588738579349",
+          "kms:ViaService" = "ec2.us-east-1.amazonaws.com"
+        }
+      }
+    },
+      {
+        Sid    = "Allow ASG to use the key"
+        Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.webserver_role.arn
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         },
         Action = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+        "kms:Describe*",
+        "kms:Get*",
+        "kms:List*",
+        "kms:RevokeGrant"
         ],
         Resource = "*"
-      },
-
+      }
     ]
   })
 }

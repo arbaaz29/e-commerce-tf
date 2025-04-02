@@ -21,7 +21,7 @@ resource "aws_launch_template" "webserver" {
       volume_size           = 8
       volume_type           = "gp2"
       encrypted             = true
-      kms_key_id =  "arn:aws:kms:us-east-1:588738579349:key/48eb3b19-35ae-43f1-8d2f-09de0afcf7b4"
+      kms_key_id =  aws_kms_key.kms.arn
       delete_on_termination = true
     }
   }

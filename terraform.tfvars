@@ -1,7 +1,7 @@
 vpc_cidr = "10.0.0.0/16"
 tag_name = "midterms"
 basename = "e-commerce"
-secretnumber = "50"
+secretnumber = "52"
 public_subnet_cidrs = {
   subnet-az1 = {
     az   = "us-east-1a"
