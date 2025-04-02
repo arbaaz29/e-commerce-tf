@@ -44,7 +44,7 @@ rds_instance_type = "db.t3.micro"
 # private_subnet_az = [us-east-1a, us-east-1b]
 
 certificate_arn = "arn:aws:acm:us-east-1:588738579349:certificate/74349c86-0c4a-4af1-90a9-d70e45d9ed4f"
-secretnumber = "46"
+secretnumber = "47"
 
 
 
