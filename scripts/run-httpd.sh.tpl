@@ -59,9 +59,9 @@ sudo systemctl restart apache2 || handle_error "Failed to restart Apache"
 sudo rm -rf /var/www/html/index.html || handle_error "Failed to delete index"
 
 # Download and move the application
-git clone https://github.com/edaviage/818N-E_Commerce_Application.git || handle_error "Unable to download GitHub repo"
+git clone https://github.com/arbaaz29/e-commerce-app.git || handle_error "Unable to download GitHub repo"
 
-cd 818N-E_Commerce_Application || handle_error "Failed to change directory to e-commerce-app"
+cd e-commerce-app || handle_error "Failed to change directory to e-commerce-app"
 
 sudo mv * /var/www/html || handle_error "Unable to move the repo"
 
