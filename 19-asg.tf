@@ -1,8 +1,10 @@
+//asg using the launch template
+//desired instances 2, minimum 1 and maximum 4
 resource "aws_autoscaling_group" "asg" {
   name = "deployed-using-terraform"
   max_size = 4
   min_size = 1
-  desired_capacity = 1
+  desired_capacity = 2
   health_check_grace_period = 300
   health_check_type = "EC2"
   force_delete = true
@@ -58,7 +60,7 @@ resource "aws_autoscaling_attachment" "elb_conn" {
   autoscaling_group_name = aws_autoscaling_group.asg.id
   lb_target_group_arn    = aws_lb_target_group.tg.arn
 }
-
+//target policies
 resource "aws_autoscaling_policy" "asg" {
   autoscaling_group_name = aws_autoscaling_group.asg.name
   name = "asg_tracking_policy"
@@ -72,6 +74,7 @@ resource "aws_autoscaling_policy" "asg" {
 
 }
 
+//SNS to send atuoscaling notifications
 resource "aws_autoscaling_notification" "sns_notification" {
   group_names = [aws_autoscaling_group.asg.id]
   notifications = [

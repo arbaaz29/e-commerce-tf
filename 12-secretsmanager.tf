@@ -3,6 +3,8 @@ resource "random_password" "rds" {
   special         = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
+
+//create and store password in secretsmanager
 resource "aws_secretsmanager_secret" "database_credentials" {
   name_prefix = "e-commerce/database-credentials-"
   description = "Database credentials for e-commerce application"

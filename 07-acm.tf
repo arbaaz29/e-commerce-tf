@@ -1,5 +1,4 @@
-//import the certificate and use dns verification method
-
+//create aws managed certificates and validate them using DNS validation method
 resource "aws_acm_certificate" "cstm_cert" {
   domain_name       = "midterms.spring-e-commerce.academy"
   validation_method = "DNS"
@@ -8,9 +7,6 @@ resource "aws_acm_certificate" "cstm_cert" {
     validation_domain = "spring-e-commerce.academy"
   }
 }
-
-
-//import the certificate and use dns verification method
 resource "aws_acm_certificate" "cert" {
   domain_name = "spring-e-commerce.academy"
   validation_method = "DNS"

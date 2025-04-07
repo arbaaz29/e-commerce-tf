@@ -1,3 +1,4 @@
+# elastic ip's for NAT gateways
 resource "aws_eip" "nat" {
   for_each = var.public_subnet_cidrs
   domain   = "vpc"
@@ -7,6 +8,7 @@ resource "aws_eip" "nat" {
   }
 }
 
+#NAT gateway for private instances
 resource "aws_nat_gateway" "ngw" {
   for_each      = var.public_subnet_cidrs
   subnet_id     = aws_subnet.public-subnet[each.key].id

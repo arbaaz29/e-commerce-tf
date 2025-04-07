@@ -1,28 +1,8 @@
+# Architecture Diagram Overview:
 <image src="/images/architecture.png">
 
-
-
-# Pre-requisites:
-
-1. Install terraform and add it to your path
-
-2. Create a IAM user Admin with AdminAccess Policy
-
-3. Create access credentials that can be used in aws cli
-
-4. Configure your aws cli using the token
-
-# Things to do:
-
-1. Configuring S3 buckets to use it as a static delivery option for efficiency
-
-2. Configure CloudWatch to pull all the metrics
-
-3. Configure secure communication between private instances and rds using the self signed certificate from acm
-
-4. testing and load balancing
-
-5. creating auto scaling and using cloud watch metrics to autoscale the instances
+# In-Depth service architecture:
+<image src="/images/Services_attached.png">
 
 # How to use Terraform:
 ```bash
@@ -35,6 +15,22 @@
     terraform apply 
 
 ```
+
+# Pre-requisites:
+
+1. Install terraform and add it to your path
+
+2. Create a IAM user Admin with AdminAccess Policy
+
+3. Create access credentials that can be used in aws cli
+
+4. Configure your aws cli using the token
+
+5. Hosted Zones (either via Route53 DNS or Import from other domain)
+
+6. SSL/TLS certificate for the CloudFront issued via ACM
+
+7. S3 bucket with static contents and attach it to cloudfront for edge caching
 
 
 # Assets created
@@ -49,7 +45,7 @@
 
 5. Route of private subnet for rds is only attached to NAT gateway and doesn't lead outside the network, but the instances within the VPC can still access it
 
-6. Private key and certificate and imported it to ACM
+6. Issue certificates and validate them via DNS validation method through ACM
 
 7. Security Groups:
 
@@ -67,8 +63,21 @@
 
 11. New instance in public subnet that you can access using ssh just remember to change the key_name attribute in instances to the keys you have
 
-12. You can try deploying your code onto the instances within the private subnet 
+12. The automated bash script will download and setup the application within the instances 
 
+13. LoadBalancer with stickiness for session management, so that there won't be overlap in data
 
-# In-Depth service architecture:
-<image src="/images/Services_attached.png">
+14. S3 bucket for storing access logs and coonnection logs from lb
+
+15. Cloudwatch alarms and log groups for metric consumption and log collection from WAF
+
+16. Route53 for routing traffic to the respective resources
+
+17. AMI, creating custom ami for Autoscaling groups
+
+18. Launch Template to launch the ami and configuring the instances
+
+19. Autoscaling group to launch the instances according to CPU utilization, desired instances are 2 and minimum 1 and maximum 4
+    i. This means that atleast 1 instance will be running at all times
+
+20. Secrets manager stores secrets in a central way, these credentials and endpints are used in db connection for the application

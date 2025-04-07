@@ -1,4 +1,4 @@
-//symmetric key required to encrypt s3, ebs volumes and RDS 
+//symmetric key required to encrypt s3, ebs, acm volumes and RDS 
 //Asymmetric needed to encypt keys
 //get current users identity
 data "aws_caller_identity" "current" {}
@@ -45,21 +45,7 @@ resource "aws_kms_key" "kms_ebs" {
           "kms:ViaService" = "ec2.us-east-1.amazonaws.com"
         }
       }
-    },
-      {
-        Sid    = "Allow root to use the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        Action = [
-        "kms:Describe*",
-        "kms:Get*",
-        "kms:List*",
-        "kms:RevokeGrant"
-        ],
-        Resource = "*"
-      }
+    }
     ]
   })
 }
@@ -73,7 +59,7 @@ resource "aws_kms_key" "kms_rds" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Id      = "key-default-1"
+    Id      = "key-default-2"
     Statement = [
       {
         Sid    = "Enable IAM User Permissions"
@@ -105,21 +91,7 @@ resource "aws_kms_key" "kms_rds" {
           "kms:ViaService" = "rds.us-east-1.amazonaws.com"
         }
       }
-    },
-      {
-        Sid    = "Allow root to use the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        Action = [
-        "kms:Describe*",
-        "kms:Get*",
-        "kms:List*",
-        "kms:RevokeGrant"
-        ],
-        Resource = "*"
-      }
+    }
     ]
   })
 }
@@ -134,7 +106,7 @@ resource "aws_kms_key" "kms_s3" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Id      = "key-default-1"
+    Id      = "key-default-3"
     Statement = [
       {
         Sid    = "Enable IAM User Permissions"
@@ -166,35 +138,21 @@ resource "aws_kms_key" "kms_s3" {
           "kms:ViaService" = "s3.us-east-1.amazonaws.com"
         }
       }
-    },
-      {
-        Sid    = "Allow root to use the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        Action = [
-        "kms:Describe*",
-        "kms:Get*",
-        "kms:List*",
-        "kms:RevokeGrant"
-        ],
-        Resource = "*"
-      }
+    }
     ]
   })
 }
 
 //kms key to encrypt secretsmanager 
 resource "aws_kms_key" "kms_secretmanager" {
-  description              = "Symmetric KMS key for RDS Encryption"
+  description              = "Symmetric KMS key for secrets Encryption"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
   key_usage                = "ENCRYPT_DECRYPT"
   enable_key_rotation      = true
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Id      = "key-default-1"
+    Id      = "key-default-4"
     Statement = [
       {
         Sid    = "Enable IAM User Permissions"
@@ -226,21 +184,7 @@ resource "aws_kms_key" "kms_secretmanager" {
           "kms:ViaService" = "secretsmanager.us-east-1.amazonaws.com"
         }
       }
-    },
-      {
-        Sid    = "Allow root to use the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        Action = [
-        "kms:Describe*",
-        "kms:Get*",
-        "kms:List*",
-        "kms:RevokeGrant"
-        ],
-        Resource = "*"
-      }
+    }
     ]
   })
   }
@@ -248,14 +192,14 @@ resource "aws_kms_key" "kms_secretmanager" {
 
 //kms key to encrypt acm 
 resource "aws_kms_key" "kms_acm" {
-  description              = "Symmetric KMS key for RDS Encryption"
+  description              = "Symmetric KMS key for amc"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
   key_usage                = "ENCRYPT_DECRYPT"
   enable_key_rotation      = true
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Id      = "key-default-1"
+    Id      = "key-default-5"
     Statement = [
       {
         Sid    = "Enable IAM User Permissions"
@@ -359,21 +303,7 @@ resource "aws_kms_key" "kms_acm" {
           "kms:CallerAccount": "588738579349"
         }
       }
-    },
-      {
-        Sid    = "Allow root to use the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        Action = [
-        "kms:Describe*",
-        "kms:Get*",
-        "kms:List*",
-        "kms:RevokeGrant"
-        ],
-        Resource = "*"
-      }
+    }
     ]
   })
   }
@@ -403,8 +333,7 @@ resource "aws_kms_key" "kms_acm" {
     target_key_id = aws_kms_key.kms_secretmanager.arn
   }
 
-  
-  resource "aws_kms_alias" "kms_acm" {
-    name_prefix = "alias/ebs-"
+    resource "aws_kms_alias" "kms_acm" {
+    name_prefix = "alias/acm-"
     target_key_id = aws_kms_key.kms_acm.arn
   }

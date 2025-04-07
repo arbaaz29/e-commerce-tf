@@ -1,3 +1,4 @@
+#strore state files in a s3 bucket and its id in dynamodb for multi user purpose
 terraform {
 
  backend "s3" {

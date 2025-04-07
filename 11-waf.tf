@@ -55,27 +55,27 @@ resource "aws_wafv2_web_acl" "waf_acl" {
     }
   }
   
-  rule {
-    name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 1
+  # rule {
+  #   name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+  #   priority = 1
     
-    statement {
-      managed_rule_group_statement {
-        vendor_name = "AWS"
-        name        = "AWSManagedRulesKnownBadInputsRuleSet"
-      }
-    }
+  #   statement {
+  #     managed_rule_group_statement {
+  #       vendor_name = "AWS"
+  #       name        = "AWSManagedRulesKnownBadInputsRuleSet"
+  #     }
+  #   }
     
-    override_action {
-      none {}
-    }
+  #   override_action {
+  #     none {}
+  #   }
     
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
-      sampled_requests_enabled   = true
-    }
-  }
+  #   visibility_config {
+  #     cloudwatch_metrics_enabled = true
+  #     metric_name                = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+  #     sampled_requests_enabled   = true
+  #   }
+  # }
   
   rule {
     name     = "AWS-AWSManagedRulesSQLiRuleSet"

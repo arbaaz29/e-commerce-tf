@@ -1,4 +1,4 @@
-# Corrected Webserver IAM Role and Policy Attachment
+#Webserver IAM Role and Policy Attachment
 resource "aws_iam_role" "webserver_role" {
   name = "WebserverRole"
 
@@ -17,12 +17,13 @@ resource "aws_iam_role" "webserver_role" {
 }
 
 resource "aws_iam_policy" "webserver_policy" {
-  name        = "WebserverPolicy"  # Changed to remove underscore
+  name        = "WebserverPolicy"  
   description = "Policy to allow EC2 instances to use necessary services"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      #put logs
       {
         Effect = "Allow"
         Action = [
@@ -32,6 +33,7 @@ resource "aws_iam_policy" "webserver_policy" {
         ]
         Resource = "*"
       },
+      #access to RDS instances
       {
         Effect = "Allow"
         Action = [
@@ -39,15 +41,17 @@ resource "aws_iam_policy" "webserver_policy" {
           "rds:ExecuteStatement",
           "rds:BatchExecuteStatement"
         ]
-        Resource = "*"
+        Resource = aws_db_instance.rds.arn
       },
+      #access to specific keys for extraction
       {
         Effect = "Allow"
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = "*"
+        Resource = aws_secretsmanager_secret.database_credentials.arn
       },
+      #access to ebs keys for encryption
       {
         Effect = "Allow"
         Action = [
@@ -57,7 +61,7 @@ resource "aws_iam_policy" "webserver_policy" {
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
         ]
-        Resource = "*"
+        Resource = aws_kms_key.kms_ebs.arn
       },
       {
         Effect = "Allow"
@@ -73,12 +77,12 @@ resource "aws_iam_role_policy_attachment" "webserver_iam_attach" {
   role       = aws_iam_role.webserver_role.name
   policy_arn = aws_iam_policy.webserver_policy.arn
 }
-
 resource "aws_iam_instance_profile" "ec2" {
   name = "WebserverRole"
   role = aws_iam_role.webserver_role.name
 }
 
+# ALB role and policy
 resource "aws_iam_role" "alb_role" {
   name = "ALBRole"
 
@@ -98,11 +102,12 @@ resource "aws_iam_role" "alb_role" {
 
 resource "aws_iam_policy" "alb_policy" {
   name        = "ALBPolicy"
-  description = "Policy to allow ALB to push logs to CloudWatch"
+  description = "Policy to allow ALB access the following resources"
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
+      #access to log groups
       {
         Effect   = "Allow",
         Action   = [
@@ -112,17 +117,7 @@ resource "aws_iam_policy" "alb_policy" {
             ],
         Resource = "*"
       },
-      {
-        Effect= "Allow",
-        Action = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
-        ],
-        Resource = "*"
-      },
+      #access to ec2 instances
       {
         Effect   = "Allow",
         Action   = [
@@ -140,27 +135,18 @@ resource "aws_iam_policy" "alb_policy" {
           "acm:ListCertificates",
           "acm:GetCertificate"
         ],
-        Resource = "*"
-      },
-      {
-        Effect   = "Allow",
-        Action   = [
-          "s3:*"
-        ],
-        Resource = "*"
+        Resource = ["${aws_acm_certificate.cstm_cert.arn}", "${aws_acm_certificate.cert.arn}"]
       }
-      
     ]
   })
 }
-
 resource "aws_iam_role_policy_attachment" "alb_policy_attach" {
   role       = aws_iam_role.alb_role.name
   policy_arn = aws_iam_policy.alb_policy.arn
 }
 
 
-
+# waf role and policy
 resource "aws_iam_role" "waf_logging_role" {
   name = "WAFLoggingRole"
 
@@ -221,10 +207,7 @@ resource "aws_iam_policy" "waf_logging_policy" {
         Effect   = "Allow",
         Action   = [
           "cloudfront:GetDistribution",
-          "cloudfront:UpdateDistribution",
           "cloudfront:ListDistributions",
-          "cloudfront:GetDistributionConfig",
-          "cloudfront:CreateDistribution"
         ],
         Resource = "*"
       }

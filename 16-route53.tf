@@ -1,8 +1,10 @@
+//this is the hosted zone
 data "aws_route53_zone" "spring" {
   name         = "spring-e-commerce.academy"
   private_zone = false
 }
 
+//add these records to the route53
 resource "aws_route53_record" "alb" {
   zone_id = data.aws_route53_zone.spring.zone_id
   name    = "midterms.spring-e-commerce.academy"

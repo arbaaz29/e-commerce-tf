@@ -1,9 +1,10 @@
+//create a launch template that will wait for ami creation and use it for auto scaling
 resource "aws_launch_template" "webserver" {
   name_prefix   = "${var.basename}-lt-"
-  image_id      = data.aws_ami.ubuntu.image_id
+  image_id      = aws_ami_from_instance.cnf_copy.id
   instance_type = var.instance_type_value
   key_name      = "lol"  # Change this to the correct key pair
-
+  depends_on = [ aws_ami_from_instance.cnf_copy ]
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2.name
   }
@@ -14,7 +15,6 @@ resource "aws_launch_template" "webserver" {
     associate_carrier_ip_address = false
     delete_on_termination = true
   }
- depends_on = [ aws_instance.webserver ]
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {
@@ -33,11 +33,11 @@ resource "aws_launch_template" "webserver" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "${var.basename}-webserver"
+      Name = "${var.basename}-webserver-configured"
     }
   }
 
-  user_data = base64encode(templatefile("./scripts/run-httpd.sh.tpl", {
-    secretname = aws_secretsmanager_secret.database_credentials.name
-  })) 
+  # user_data = base64encode(templatefile("./scripts/run-httpd.sh.tpl", {
+  #   secretname = aws_secretsmanager_secret.database_credentials.name
+  # })) 
 }

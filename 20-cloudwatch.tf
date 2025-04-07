@@ -1,18 +1,4 @@
-# resource "aws_cloudwatch_metric_alarm" "ec2_cpu_alarm" {
-#   alarm_name          = "EC2-CPU-Utilization"
-#   metric_name         = "CPUUtilization"
-#   namespace           = "AWS/EC2"
-#   statistic           = "Average"
-#   period              = 300
-#   evaluation_periods  = 1
-#   threshold           = 80
-#   comparison_operator = "GreaterThanThreshold"
-#   alarm_description   = "Alarm when EC2 CPU exceeds 80% utilization"
-#   dimensions = {
-#     InstanceId = aws_instance.webserver["subnet-az1"].id  # EC2 instance ID (subnet-az1)
-#   }
-# }
-
+//collect all the logs and metrics from services
 resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
   alarm_name          = "rds-high-cpu"
   comparison_operator = "GreaterThanThreshold"

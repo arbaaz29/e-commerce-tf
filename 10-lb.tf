@@ -1,21 +1,22 @@
 //create application loadbalancer and attach the respective security group to it check application blocks if you want to confiure it  
+// attach 2 az's at minimum, 
 resource "aws_lb" "alb" {
-  name               = "${var.basename}-alb"
+  name               = "lb"
   depends_on         = [aws_lb_target_group.tg]
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.sg_loadbalancer.id]
   subnets            = [aws_subnet.public-subnet["subnet-az1"].id, aws_subnet.public-subnet["subnet-az2"].id]
-  #   access_logs {
-  #   bucket  = aws_s3_bucket.alb_logs.id
-  #   prefix  = "alb-access-logs"
-  #   enabled = true
-  # }
-  # connection_logs {
-  #   bucket = aws_s3_bucket.alb_connection_logs.id
-  #   prefix  = "alb-connection-logs"
-  #   enabled = true
-  # }
+    access_logs {
+    bucket  = aws_s3_bucket.alb_access.bucket
+    prefix  = "alb/alb-access-logs"
+    enabled = true
+  }
+  connection_logs {
+    bucket = aws_s3_bucket.alb_access.bucket
+    prefix  = "alb/alb-connection-logs"
+    enabled = true
+  }
 
   tags = {
     Name = "${var.basename}-loadbalancer"
@@ -47,9 +48,10 @@ resource "aws_lb_listener" "lb_listener" {
     Name = "${var.basename}-listener"
   }
 }
+
 //create listener for encrypted communication
 resource "aws_lb_listener" "https_lb_listener" {
-  depends_on = [ aws_acm_certificate.cert ]
+  depends_on = [ aws_acm_certificate.cert, aws_ami_from_instance.cnf_copy ]
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
@@ -69,7 +71,7 @@ resource "aws_lb_listener" "https_lb_listener" {
 
 //create target group
 resource "aws_lb_target_group" "tg" {
-  depends_on = [aws_instance.webserver]
+  depends_on = [aws_instance.webserver, aws_ami_from_instance.cnf_copy]
   name       = "ec2-target-group"
   port       = 80
   protocol   = "HTTP"
@@ -82,7 +84,13 @@ resource "aws_lb_target_group" "tg" {
     unhealthy_threshold = 3
     matcher             = "200-399"
   }
+  stickiness {
+    cookie_duration = 3600
+    type = "lb_cookie"
+    enabled = true
+  }
 }
+
 //search for ec2 instance targets in private subnet
 resource "aws_lb_target_group_attachment" "lb_attachment" {
   # for_each         = aws_instance.webserver
@@ -91,4 +99,3 @@ resource "aws_lb_target_group_attachment" "lb_attachment" {
   port             = 80
   depends_on       = [aws_lb_target_group.tg]
 }
-

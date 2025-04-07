@@ -1,83 +1,62 @@
-# //access_logs
-# # 1. Create the S3 Bucket for ALB Logs
-# resource "aws_s3_bucket" "alb_logs" {
-#   bucket = "e-comm-alb-logs-bucket"
-# }
+//s3 buckets to store access and connection logs for alb
+resource "aws_s3_bucket" "alb_access" {
+  bucket = "my-alb-logs-ecomm"
+}
+resource "aws_s3_bucket_ownership_controls" "alb_access" {
+  bucket = aws_s3_bucket.alb_access.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+resource "aws_s3_bucket_acl" "alb_access" {
+  depends_on = [ aws_s3_bucket_ownership_controls.alb_access ]
+  bucket = aws_s3_bucket.alb_access.id
+  acl = "private"
+}
 
-# # 2. Enable Server-Side Encryption
-# resource "aws_s3_bucket_server_side_encryption_configuration" "alb_logs_encryption" {
-#   bucket = aws_s3_bucket.alb_logs.id
+resource "aws_s3_bucket_policy" "alb" {
+  bucket = aws_s3_bucket.alb_access.id
+  policy =jsonencode( {
+    Version = "2012-10-17"
+    Statement = [
+        {
+            Effect = "Allow"
+            Principal = {
+                AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/terraform"
+            }
+            Action = [
+                "s3:PutObject"
+            ]
+            Resource = "${aws_s3_bucket.alb_access.arn}/*"
+        },
+        {
+            Effect = "Allow"
+            Principal = {
+                AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+            }
+            Action = [
+                "s3:*"
+            ]
+            Resource = "${aws_s3_bucket.alb_access.arn}/*"
+        },
+        {
+            Effect = "Allow",
+            Principal = {
+            Service = "logdelivery.elasticloadbalancing.amazonaws.com"
+            },
+            Action = "s3:PutObject",
+            Resource = "${aws_s3_bucket.alb_access.arn}/*"
+         }
+    ]
+  })
+}
 
-#   rule {
-#     apply_server_side_encryption_by_default {
-#       sse_algorithm = "AES256"
-#     }
-#   }
-# }
-
-# # 3. Set Bucket Policy to Allow ALB to Write Logs
-# resource "aws_s3_bucket_policy" "alb_logs_policy" {
-#   bucket = aws_s3_bucket.alb_logs.id
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Effect = "Allow"
-#       Principal = {
-#         AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-#       }
-#       Action   = "s3:PutObject"
-#       Resource = "${aws_s3_bucket.alb_logs.arn}/AWSLogs/*"
-#     }]
-#   })
-# }
-
-# # 4. Enable Bucket Versioning (Optional, for audit purposes)
-# resource "aws_s3_bucket_versioning" "alb_logs_versioning" {
-#   bucket = aws_s3_bucket.alb_logs.id
-#   versioning_configuration {
-#     status = "Enabled"
-#   }
-# }
-
-# //connection_logs
-# # 1. Create the S3 Bucket for ALB Logs
-# resource "aws_s3_bucket" "alb_connection_logs" {
-#   bucket = "e-comm-alb-connection-logs-bucket"
-# }
-
-# # 2. Enable Server-Side Encryption
-# resource "aws_s3_bucket_server_side_encryption_configuration" "alb_connection_logs_encryption" {
-#   bucket = aws_s3_bucket.alb_connection_logs.id
-
-#   rule {
-#     apply_server_side_encryption_by_default {
-#       sse_algorithm = "AES256"
-#     }
-#   }
-# }
-
-# # 3. Set Bucket Policy to Allow ALB to Write Logs
-# resource "aws_s3_bucket_policy" "alb_connection_logs_policy" {
-#   bucket = aws_s3_bucket.alb_connection_logs.id
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Effect = "Allow"
-#       Principal = {
-#         AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-#       }
-#       Action   = "s3:PutObject"
-#       Resource = "${aws_s3_bucket.alb_connection_logs.arn}/AWSLogs/*"
-#     }]
-#   })
-# }
-
-# # 4. Enable Bucket Versioning (Optional, for audit purposes)
-# resource "aws_s3_bucket_versioning" "alb_connection_logs_versioning" {
-#   bucket = aws_s3_bucket.alb_connection_logs.id
-#   versioning_configuration {
-#     status = "Enabled"
-#   }
-# }
+# 4. Enable Bucket Versioning (Optional, for audit purposes)
+resource "aws_s3_bucket_versioning" "alb_access_logs_versioning" {
+  bucket = aws_s3_bucket.alb_access.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
 

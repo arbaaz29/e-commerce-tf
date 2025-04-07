@@ -1,3 +1,4 @@
+//cloudtrail to record api requests
 resource "aws_iam_role" "cloudtrail_role" {
   name = "cloudtrail-logs-role"
 
